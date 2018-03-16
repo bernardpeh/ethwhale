@@ -1,4 +1,3 @@
-require('dotenv').config();
 var mysql = require('mysql');
 
 var con = mysql.createConnection({
@@ -8,4 +7,4 @@ var con = mysql.createConnection({
   database: process.env.DB_NAME
 });
 
-modules.exports = con;
+module.exports = con;

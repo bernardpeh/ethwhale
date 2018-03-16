@@ -1,3 +1,4 @@
+require('dotenv').config();
 var HDWalletProvider = require("truffle-hdwallet-provider");
 var mnemonic = "your secret mnemonic";
 
