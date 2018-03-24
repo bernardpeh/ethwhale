@@ -2,10 +2,10 @@ var con = require('./db.js');
 
 // 15 secs block time average == 240 blocks/hr == 5760 blocks/day
 var to_block = web3.eth.getBlock("latest").number - 1;
-var from_block = 1397550;
+var from_block = to_block-2;
+// var from_block = 1397550;
 
 // 5311232
-console.log("latest block is "+web3.eth.getBlock("latest"));
 
 var human_standard_token_abi = [
   {
