@@ -1,7 +1,7 @@
 {
-  "name": "whaletoken",
+  "name": "ethwhale",
   "version": "1.0.0",
-  "description": "Test ERC20 Token",
+  "description": "erc20 stats",
   "main": "truffle-config.js",
   "directories": {
     "test": "test"

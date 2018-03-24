@@ -1,3 +1,3 @@
 #!/bin/bash
 
-rsync -var scripts myuser@myserver:/home/myuser/ethwhale/
+rsync -var --exclude ./node_modules ./ myuser@myserver:/home/myuser/ethwhale/

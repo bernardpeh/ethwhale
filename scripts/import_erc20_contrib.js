@@ -5,10 +5,11 @@ var from_block = to_block - 50;
 
 console.log("latest block is "+to_block);
 
+
 module.exports = function() {
   con.connect(function (err) {
     if (err) {
-      throw err;
+      console.log('error connecting');
     }
 
     var options = {
@@ -22,7 +23,6 @@ module.exports = function() {
 
     filter.get(function (error, result) {
       if (!error) {
-        let counter = 0;
         result.forEach( (e) => {
           let contract_address = e.address;
           let blocknumber = e.blockNumber;
@@ -42,11 +42,9 @@ module.exports = function() {
           }
           // dont bother recording if no to and from address
           if (address_from && address_to) {
-            let sql = "INSERT INTO erc20 (contract_address, address_from, address_to, val, txhash, blocknumber) VALUES ('"+contract_address+"','"+address_from+"','"+address_to+"','"+val+"','"+txhash+"','"+blocknumber+"')";
-            console.log(sql);
+            let sql = "INSERT INTO erc20_contrib (contract_address, address_from, address_to, val, txhash, blocknumber) VALUES ('"+contract_address+"','"+address_from+"','"+address_to+"','"+val+"','"+txhash+"','"+blocknumber+"')";
             con.query(sql, function (db_err, db_res) {
-              counter++;
-              console.log(counter + ": val is "+val+" and tx hash is "+txhash);
+              console.log(sql);
             });
           }
         });
