@@ -1,6 +1,6 @@
-var mysql = require('mysql');
+var MySql = require('sync-mysql');
 
-var con = mysql.createConnection({
+var con= new MySql({
   host: process.env.DB_HOST,
   user: process.env.DB_USER,
   password: process.env.DB_PASS,

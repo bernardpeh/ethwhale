@@ -1,9 +1,13 @@
 var con = require('./db.js');
 
 // 15 secs block time average == 240 blocks/hr == 5760 blocks/day
-var to_block = web3.eth.getBlock("latest").number - 1;
-var from_block = to_block-2;
-// var from_block = 1397550;
+// var to_block = web3.eth.getBlock("latest").number - 1;
+// var from_block = to_block-1;
+
+var increment = 100000;
+var counter = 1;
+var from_block = 1490960;
+var to_block = from_block+(increment*counter);
 
 // 5311232
 
@@ -330,92 +334,97 @@ var human_standard_token_abi = [
 ];
 
 module.exports = function() {
-  con.connect(function (err) {
-    if (err) {
-      console.log('error connecting');
-    }
 
-    var options = {
-      fromBlock: from_block,
-      toBlock: to_block,
-      // address: "0xf1f64f6b8e17dd68c1db10b0eed3d2541a6c09ab"
-      topics: [web3.sha3("Transfer(address,address,uint256)")]
-    };
+  var options = {
+    fromBlock: from_block,
+    toBlock: to_block,
+    // address: "0xf1f64f6b8e17dd68c1db10b0eed3d2541a6c09ab"
+    topics: [web3.sha3("Transfer(address,address,uint256)")]
+  };
 
-    var filter = web3.eth.filter(options);
+  var filter = web3.eth.filter(options);
 
-    filter.get(function (error, results) {
-      if (!error) {
-        for (let e of results) {
-          let contract_address = e.address;
-          let block_number = e.blockNumber;
-          let topics = e.topics;
-          let address_from = '';
-          let address_to = '';
-          let name = symbol = decimals = total_supply = '';
+  filter.get(function (error, results) {
+    if (!error) {
+      for (let e of results) {
+        let contract_address = e.address;
+        let block_number = e.blockNumber;
+        let topics = e.topics;
+        let address_from = '';
+        let address_to = '';
+        let name = symbol = decimals = total_supply = '';
 
-          // value based on the token decimals
-          let val = (parseInt(e.data) / Math.pow(10, 18)).toFixed(4);
+        // value based on the token decimals
+        let val = (parseInt(e.data) / Math.pow(10, 18)).toFixed(4);
 
-          if (topics[1]) {
-            address_from = '0x' + topics[1].substring(26);
+        if (topics[1]) {
+          address_from = '0x' + topics[1].substring(26);
+        }
+        if (topics[2]) {
+          address_to = '0x' + topics[2].substring(26);
+        }
+        // dont bother recording if no to and from address
+        if (address_from && address_to) {
+
+          let contract = web3.eth.contract(human_standard_token_abi).at(contract_address);
+
+          try {
+            name = contract.name();
           }
-          if (topics[2]) {
-            address_to = '0x' + topics[2].substring(26);
+          catch (ex) {
+            try {
+              name = contract.NAME();
+            }
+            catch (e) {
+              name = 'UNKNOWN';
+            }
           }
-          // dont bother recording if no to and from address
-          if (address_from && address_to) {
 
-            let contract = web3.eth.contract(human_standard_token_abi).at(contract_address);
-            console.log('checking contract'+contract_address);
+          try {
+            symbol = contract.symbol();
+          }
+          catch (ex) {
             try {
-              name = contract.name();
+              symbol = contract.SYMBOL();
             }
-            catch (ex) {
-              try {
-                name = contract.NAME();
-              }
-              catch (e) {
-                name = 'UNKNOWN';
-              }
+            catch (e) {
+              symbol = 'UNKNOWN';
             }
+          }
 
+          try {
+            decimals = contract.decimals().toNumber();
+          }
+          catch (ex) {
             try {
-              symbol = contract.symbol();
+              decimals = contract.DECIMALS().toNumber();
             }
-            catch (ex) {
-              try {
-                symbol = contract.SYMBOL();
-              }
-              catch (e) {
-                symbol = 'UNKNOWN';
-              }
+            catch (e) {
+              decimals = 0;
             }
+          }
 
-            try {
-              decimals = contract.decimals().toNumber();
-            }
-            catch (ex) {
-              try {
-                decimals = contract.DECIMALS().toNumber();
-              }
-              catch (e) {
-                decimals = 0;
-              }
-            }
+          total_supply = (contract.totalSupply().toNumber() / Math.pow(10, decimals)).toFixed(4);
 
-            total_supply = (contract.totalSupply().toNumber() / Math.pow(10, decimals)).toFixed(4);
-
-            let sql = "INSERT INTO erc20_contract (contract_address, name, symbol, decimals, total_supply, block_number) VALUES ('" + contract_address + "','" + name + "','" + symbol + "','" + decimals + "','" + total_supply + "','" + block_number + "')";
-
-            con.query(sql, function (error, results, fields) {
-              // if (error) throw error;
-              console.log(sql);
-            });
+          let sql = "INSERT INTO erc20_contract (contract_address, name, symbol, decimals, total_supply, block_number) VALUES ('" + contract_address + "','" + name + "','" + symbol + "','" + decimals + "','" + total_supply + "','" + block_number + "')";
+          try {
+            con.query(sql);
+          }
+          catch(err) {
 
           }
+          console.log(sql);
+
+          // con.query(sql, function (error, results, fields) {
+          //   // if (error) throw error;
+          //   console.log(sql);
+          // });
+
         }
       }
-    });
-  })
+      console.log("All done");
+      process.exit();
+    }
+  });
 }
+
