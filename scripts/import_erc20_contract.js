@@ -4,10 +4,17 @@ var con = require('./db.js');
 // var to_block = web3.eth.getBlock("latest").number - 1;
 // var from_block = to_block-1;
 
-var increment = 100000;
-var counter = 1;
-var from_block = 1490960;
-var to_block = from_block+(increment*counter);
+const args = process.argv;
+
+if (!args[5]) {
+  console.log("truffle exec scripts/import_erc20_contract.js from_block to_block");
+}
+
+// var from_block = 1599207;
+var from_block = args[4];
+var to_block = args[5];
+
+console.log("truffle exec scripts/import_erc20_contract.js "+from_block+" "+to_block);
 
 // 5311232
 

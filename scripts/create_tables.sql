@@ -24,6 +24,7 @@ CREATE TABLE `erc20_contract` (
   `decimals` varchar(2) NULL,
   `total_supply` varchar(40) NULL,
   `valid`  TINYINT(1) NOT NULL DEFAULT '0',
+  `tx_count` int(11) NULL,
    PRIMARY KEY  (`id`)
 );
 
